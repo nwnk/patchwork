@@ -149,13 +149,26 @@ def find_pull_request(content):
         return match.group(1)
     return None
 
-
 def try_decode(payload, charset):
     try:
         payload = unicode(payload, charset)
     except UnicodeDecodeError:
         return None
     return payload
+
+def strip_signature(text):
+    if not text:
+        return
+
+    buf = ''
+    for line in text.splitlines(True):
+        if line == '-- \n':
+            break
+        buf += line
+
+    if buf == '':
+        return None
+    return buf.strip()
 
 class MailContent:
     def __init__(self):
@@ -244,6 +257,8 @@ def find_content(project, mail):
 
             if c is not None:
                 commentbuf += c.strip() + '\n'
+
+    commentbuf = strip_signature(commentbuf)
 
     ret = MailContent()
 
