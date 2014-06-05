@@ -24,6 +24,8 @@ from django.contrib.auth.models import User
 from django.forms.fields import EmailField
 
 from email import message_from_file
+from email.utils import make_msgid
+
 try:
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
@@ -107,6 +109,8 @@ def read_patch(filename, encoding = None):
 def read_mail(filename, project = None):
     file_path = os.path.join(_test_mail_dir, filename)
     mail = message_from_file(open(file_path))
+    if 'Message-Id' not in mail:
+        mail['Message-Id'] = make_msgid()
     if project is not None:
         mail['List-Id'] = project.listid
     return mail
@@ -130,6 +134,7 @@ def create_email(content, subject = None, sender = None, multipart = False,
     else:
         msg = MIMEText(content, _charset = content_encoding)
 
+    msg['Message-Id'] = make_msgid()
     msg['Subject'] = subject
     msg['From'] = sender
     msg['List-Id'] = project.listid
