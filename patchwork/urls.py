@@ -29,6 +29,10 @@ import patchwork.views.api as api
 # /projects/$project/
 project_router = routers.SimpleRouter()
 project_router.register('projects', api.ProjectViewSet)
+# /projects/$project/series
+series_list_router = routers.NestedSimpleRouter(project_router, 'projects',
+                                                lookup='project')
+series_list_router.register(r'series', api.SeriesListViewSet)
 
 admin.autodiscover()
 
@@ -37,6 +41,7 @@ urlpatterns = patterns('',
 
     # API
     (r'^api/1.0/', include(project_router.urls)),
+    (r'^api/1.0/', include(series_list_router.urls)),
 
     # Example:
     (r'^$', 'patchwork.views.projects'),

@@ -17,7 +17,7 @@
 # along with Patchwork; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from patchwork.models import Project
+from patchwork.models import Project, Series
 from rest_framework import serializers
 
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
@@ -25,3 +25,17 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
         model = Project
         fields = ('name', 'linkname', 'listemail', 'web_url', 'scm_url',
                   'webscm_url')
+
+class SeriesSerializer(serializers.ModelSerializer):
+    submitter__name = serializers.CharField(source='submitter.name',
+                                            read_only=True)
+    reviewer__name = serializers.CharField(source='reviewer.name',
+                                           read_only=True)
+
+    class Meta:
+        model = Series
+        fields = ('id', 'name', 'n_patches', 'submitter', 'submitter__name',
+                  'submitted', 'last_updated', 'version', 'reviewer',
+                  'reviewer__name')
+        read_only_fields = ('n_patches', 'submitter', 'submitted',
+                            'last_updated', 'version')

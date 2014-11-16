@@ -17,10 +17,11 @@
 # along with Patchwork; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from patchwork.models import Project
-from rest_framework import viewsets
+from patchwork.models import Project, Series
+from rest_framework import viewsets, mixins, generics
 from rest_framework.response import Response
-from patchwork.serializers import ProjectSerializer
+from rest_framework.generics import get_object_or_404
+from patchwork.serializers import ProjectSerializer, SeriesSerializer
 
 class ProjectViewSet(viewsets.ViewSet):
     model = Project
@@ -34,3 +35,18 @@ class ProjectViewSet(viewsets.ViewSet):
         queryset = Project.objects.get(name=pk)
         serializer = ProjectSerializer(queryset)
         return Response(serializer.data)
+
+class SeriesListViewSet(mixins.ListModelMixin,
+                        viewsets.GenericViewSet):
+    queryset = Series.objects.all()
+    serializer_class = SeriesSerializer
+    paginate_by = 20
+    paginate_by_param = 'perpage'
+    max_paginate_by = 100
+
+    def get_queryset(self):
+        filter_kwargs = { 'project__linkname': self.kwargs['project_pk'] }
+
+        # Ensure queryset is re-evaluated on each request.
+        queryset = self.queryset.filter(**filter_kwargs)
+        return queryset
