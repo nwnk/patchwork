@@ -21,12 +21,24 @@ from django.conf.urls import patterns, url, include
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from rest_framework_nested import routers
+import patchwork.views.api as api
+
+# API
+
+# /projects/$project/
+project_router = routers.SimpleRouter()
+project_router.register('projects', api.ProjectViewSet)
 
 admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
+    # API
+    (r'^api/1.0/', include(project_router.urls)),
+
+    # Example:
     (r'^$', 'patchwork.views.projects'),
     (r'^project/(?P<project_id>[^/]+)/list/$', 'patchwork.views.patch.list'),
     (r'^project/(?P<project_id>[^/]+)/$', 'patchwork.views.project.project'),
