@@ -17,7 +17,7 @@
 # along with Patchwork; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from patchwork.models import Project, Series
+from patchwork.models import Project, Series, SeriesRevision, Patch
 from rest_framework import serializers
 
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
@@ -39,3 +39,23 @@ class SeriesSerializer(serializers.ModelSerializer):
                   'reviewer__name')
         read_only_fields = ('n_patches', 'submitter', 'submitted',
                             'last_updated', 'version')
+
+class PatchSerializer(serializers.ModelSerializer):
+    submitter__name = serializers.CharField(source='submitter.name',
+                                            read_only=True)
+    state__name = serializers.CharField(source='state.name', read_only=True)
+    class Meta:
+        model = Patch
+        fields = ('name', 'msgid', 'date', 'submitter', 'submitter__name',
+                  'state', 'state__name', 'archived', 'content')
+        read_only_fields = ('name', 'msgid', 'date', 'submitter', 'archived',
+                            'content')
+
+
+class RevisionSerializer(serializers.HyperlinkedModelSerializer):
+    patches = PatchSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = SeriesRevision
+        fields = ('version', 'cover_letter', 'patches')
+        read_only_fields = ('version', 'cover_letter')

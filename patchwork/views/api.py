@@ -17,11 +17,12 @@
 # along with Patchwork; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from patchwork.models import Project, Series
+from patchwork.models import Project, Series, SeriesRevision
 from rest_framework import viewsets, mixins, generics
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
-from patchwork.serializers import ProjectSerializer, SeriesSerializer
+from patchwork.serializers import ProjectSerializer, SeriesSerializer, \
+                                  RevisionSerializer
 
 class ProjectViewSet(viewsets.ViewSet):
     model = Project
@@ -50,3 +51,17 @@ class SeriesListViewSet(mixins.ListModelMixin,
         # Ensure queryset is re-evaluated on each request.
         queryset = self.queryset.filter(**filter_kwargs)
         return queryset
+
+class SeriesViewSet(mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    viewsets.GenericViewSet):
+    queryset = Series.objects.all()
+    serializer_class = SeriesSerializer
+
+class RevisionViewSet(viewsets.ViewSet):
+    model = SeriesRevision
+
+    def retrieve(self, request, series_pk=None, pk=None):
+        rev = get_object_or_404(SeriesRevision, series=series_pk, version=pk)
+        serializer = RevisionSerializer(rev)
+        return Response(serializer.data)
