@@ -20,7 +20,7 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import View
-from patchwork.models import Project
+from patchwork.models import Project, Series, SeriesRevision
 
 class SeriesListView(View):
     def get(self, request, *args, **kwargs):
@@ -28,3 +28,15 @@ class SeriesListView(View):
             'project': get_object_or_404(Project, linkname=kwargs['project']),
         })
 
+class SeriesView(View):
+    def get(self, request, *args, **kwargs):
+        series = get_object_or_404(Series, pk=kwargs['series'])
+        revision = get_object_or_404(SeriesRevision,
+                                     series=series,
+                                     version=series.version)
+        return render(request, 'patchwork/series.html', {
+            'series': series,
+            'project': series.project,
+            'cover_letter': revision.cover_letter,
+            'patches': revision.patches.all(),
+        })
