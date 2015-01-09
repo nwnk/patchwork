@@ -30,10 +30,14 @@ var pw = (function() {
             return reviewer;
     }
 
+    exports.amend_context = function(new_ctx) {
+        $.extend(ctx, new_ctx);
+    }
+
     exports.init = function(init_ctx) {
         _this = this;
 
-        $.extend(ctx, init_ctx);
+        this.amend_context(init_ctx);
 
         $.dynatableSetup({
             dataset: {
