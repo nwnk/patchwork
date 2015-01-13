@@ -8,6 +8,25 @@
 <script language="JavaScript" type="text/javascript">
 $(function () {
     pw.setup_series({ patches: 'series-patchlist' });
+    pw.amend_context({ series: {{ series.pk }} });
+    pw.setup_editable_fields([{
+        name: 'reviewer'
+{% if series.reviewer %}
+        ,value: { pk: {{ series.reviewer.pk }},
+                  display_name: "{{ series.reviewer.name }}" }
+{% else %}
+        ,value: { pk: null, name: null }
+{% endif %}
+        ,init_from_series: function(o) {
+            this.value.pk = o.reviewer;
+            this.value.display_name = o.reviewer__name;
+        }
+        ,is_null: function() { return !this.value.pk; }
+        ,text: function() { return this.value.display_name; }
+        ,autocomplete: { url: '/complete_user',
+                         display_field: 'display_name',
+                         search_fields: ['username', 'display_name'] }
+    }]);
 });
 </script>
 {% endblock %}
@@ -27,11 +46,25 @@ $(function () {
 <table class="patchmeta">
   <tr>
     <th>Reviewer</th>
+    <td>
+      <span id="field-reviewer">
+        <span id="field-reviewer-text">
 {% if series.reviewer %}
-    <td>{{ series.reviewer }}</td>
+          {{ series.reviewer.name }}
 {% else %}
-    <td><em class="text-muted">None</em></td>
+        <em class="text-muted">None</em>
 {% endif %}
+        </span>
+        <span class="glyphicon glyphicon-pencil" ></span>
+      </span>
+      <div id="edit-reviewer" class="form-inline" style="display:none;">
+        <div class="form-group">
+          <input type="text" class="form-control input-sm editable-field">
+          <button id="save-reviewer" type="button" class="btn btn-primary btn-sm">Save</button>
+          <button id="cancel-reviewer" type="button" class="btn btn-default btn-sm">Cancel</button>
+        </div>
+      </div>
+    </td>
   </tr>
   <tr>
     <th>Submitted</th>
