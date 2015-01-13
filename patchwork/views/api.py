@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from patchwork.models import Project, Series, SeriesRevision
-from rest_framework import viewsets, mixins, generics
+from rest_framework import viewsets, mixins, generics, filters
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from patchwork.serializers import ProjectSerializer, SeriesSerializer, \
@@ -44,6 +44,9 @@ class SeriesListViewSet(mixins.ListModelMixin,
     paginate_by = 20
     paginate_by_param = 'perpage'
     max_paginate_by = 100
+    filter_backends = (filters.OrderingFilter, )
+    ordering_fields = ('name', 'n_patches', 'submitter__name', 'reviewer__name',
+                        'submitted', 'last_updated')
 
     def get_queryset(self):
         filter_kwargs = { 'project__linkname': self.kwargs['project_pk'] }

@@ -25,8 +25,8 @@ var pw = (function() {
     var columnsMap = {
         'Series': 'name',
         'Patches': 'n_patches',
-        'Submitter': 'submitter_name',
-        'Reviewer': 'reviewer_name',
+        'Submitter': 'submitter__name',
+        'Reviewer': 'reviewer__name',
         'Submitted': 'submitted',
         'Updated': 'last_updated'
     };
@@ -67,7 +67,8 @@ var pw = (function() {
                 perPage: 'perpage',
                 records: 'results',
                 queryRecordCount: 'count',
-                totalRecordCount: 'count'
+                totalRecordCount: 'count',
+                sorts: 'ordering'
             },
             inputs: {
                 pageText: '',
@@ -79,7 +80,7 @@ var pw = (function() {
                 'name': series_writer,
                 'submitted': date_writer,
                 'last_updated': date_writer,
-                'reviewer_name': reviewer_writer
+                'reviewer__name': reviewer_writer
             }
         });
     }
