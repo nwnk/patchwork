@@ -30,6 +30,9 @@ import patchwork.views.api as api
 # /self
 users_router = routers.SimpleRouter()
 users_router.register('self', api.UserViewSet)
+# /self/reviews
+self_reviews_router = routers.SimpleRouter()
+self_reviews_router.register('self/reviews', api.SeriesReviewsViewSet)
 # /projects/$project/
 project_router = routers.SimpleRouter()
 project_router.register('projects', api.ProjectViewSet)
@@ -52,6 +55,7 @@ urlpatterns = patterns('',
 
     # API
     (r'^api/1.0/', include(users_router.urls)),
+    (r'^api/1.0/', include(self_reviews_router.urls)),
     (r'^api/1.0/', include(project_router.urls)),
     (r'^api/1.0/', include(series_list_router.urls)),
     (r'^api/1.0/', include(series_router.urls)),

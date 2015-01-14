@@ -62,6 +62,18 @@ class SeriesListMixin:
     ordering_fields = ('name', 'n_patches', 'submitter__name', 'reviewer__name',
                         'submitted', 'last_updated')
 
+class SeriesReviewsViewSet(mixins.ListModelMixin,
+                           SeriesListMixin,
+                           viewsets.GenericViewSet):
+    permission_classes = (UserPermission, )
+
+    def get_queryset(self):
+        filter_kwargs = { 'reviewer': self.request.user }
+
+        # Ensure queryset is re-evaluated on each request.
+        queryset = self.queryset.filter(**filter_kwargs)
+        return queryset
+
 class ProjectViewSet(viewsets.ViewSet):
     permission_classes = (MaintainerPermission, )
     model = Project
