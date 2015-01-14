@@ -17,8 +17,14 @@
 # along with Patchwork; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from django.contrib.auth.models import User
 from patchwork.models import Project, Series, SeriesRevision, Patch
 from rest_framework import serializers
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', )
 
 class ProjectSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

@@ -17,12 +17,13 @@
 # along with Patchwork; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from django.contrib.auth.models import User
 from patchwork.models import Project, Series, SeriesRevision
 from rest_framework import viewsets, mixins, generics, filters, permissions
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from patchwork.serializers import ProjectSerializer, SeriesSerializer, \
-                                  RevisionSerializer
+                                  RevisionSerializer, UserSerializer
 
 class MaintainerPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -35,6 +36,21 @@ class MaintainerPermission(permissions.BasePermission):
         if not user.is_authenticated():
             return False
         return obj.project.is_editable(user)
+
+class UserPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # user data can be sensitive, only the user itself can access this
+        # information
+        return obj == request.user
+
+class UserViewSet(viewsets.ViewSet):
+    permission_classes = (UserPermission, )
+    model = User
+
+    def list(self, request):
+        self = User.objects.get(pk=request.user.pk)
+        serializer = UserSerializer(self)
+        return Response(serializer.data)
 
 class ProjectViewSet(viewsets.ViewSet):
     permission_classes = (MaintainerPermission, )
