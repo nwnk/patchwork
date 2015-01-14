@@ -37,6 +37,7 @@ class SeriesView(View):
         return render(request, 'patchwork/series.html', {
             'series': series,
             'project': series.project,
+            'is_editable': series.project.is_editable(request.user),
             'cover_letter': revision.cover_letter,
             'patches': revision.patches.all(),
         })

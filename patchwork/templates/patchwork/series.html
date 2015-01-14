@@ -55,7 +55,9 @@ $(function () {
         <em class="text-muted">None</em>
 {% endif %}
         </span>
+{% if is_editable %}
         <span class="glyphicon glyphicon-pencil" ></span>
+{% endif %}
       </span>
       <div id="edit-reviewer" class="form-inline" style="display:none;">
         <div class="form-group">
