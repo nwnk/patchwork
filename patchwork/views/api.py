@@ -18,13 +18,26 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from patchwork.models import Project, Series, SeriesRevision
-from rest_framework import viewsets, mixins, generics, filters
+from rest_framework import viewsets, mixins, generics, filters, permissions
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
 from patchwork.serializers import ProjectSerializer, SeriesSerializer, \
                                   RevisionSerializer
 
+class MaintainerPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # read only for everyone
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        # editable for maintainers
+        user = request.user
+        if not user.is_authenticated():
+            return False
+        return obj.project.is_editable(user)
+
 class ProjectViewSet(viewsets.ViewSet):
+    permission_classes = (MaintainerPermission, )
     model = Project
 
     def list(self, request):
@@ -39,6 +52,7 @@ class ProjectViewSet(viewsets.ViewSet):
 
 class SeriesListViewSet(mixins.ListModelMixin,
                         viewsets.GenericViewSet):
+    permission_classes = (MaintainerPermission, )
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
     paginate_by = 20
@@ -58,10 +72,12 @@ class SeriesListViewSet(mixins.ListModelMixin,
 class SeriesViewSet(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     viewsets.GenericViewSet):
+    permission_classes = (MaintainerPermission, )
     queryset = Series.objects.all()
     serializer_class = SeriesSerializer
 
 class RevisionViewSet(viewsets.ViewSet):
+    permission_classes = (MaintainerPermission, )
     model = SeriesRevision
 
     def retrieve(self, request, series_pk=None, pk=None):
