@@ -18,7 +18,7 @@
   <td><a
    href="{% url 'patchwork.views.user.todo_list' project_id=todo_list.project.linkname %}"
     >{{ todo_list.project.name }}</a></td>
-  <td class="numberformat">{{ todo_list.n_patches }}</td>
+  <td class="numberformat">{{ todo_list.n_items }}</td>
  </tr>
 {% endfor %}
 </table>

@@ -185,10 +185,13 @@ def todo_lists(request):
 
     for project in Project.objects.all():
         patches = request.user.profile.todo_patches(project = project)
-        if not patches.count():
+        series = request.user.profile.todo_series(project=project)
+
+        n_items = patches.count() + series.count()
+        if not n_items:
             continue
 
-        todo_lists.append({'project': project, 'n_patches': patches.count()})
+        todo_lists.append({'project': project, 'n_items': n_items})
 
     if len(todo_lists) == 1:
         return todo_list(request, todo_lists[0]['project'].linkname)
