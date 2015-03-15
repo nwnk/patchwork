@@ -85,8 +85,12 @@ var pw = (function() {
         });
     }
 
-    exports.setup_series_list = function(selector) {
+    exports.setup_series_list = function(selector, url) {
         var table = $(selector);
+        var url;
+
+        if (typeof url == 'undefined')
+            url = '/api/1.0/projects/' + ctx.project + '/series/';
 
         table.bind('dynatable:preinit', function(e, dynatable) {
             dynatable.utility.textTransform.PatchworkSeries = function(text) {
@@ -102,7 +106,7 @@ var pw = (function() {
             },
             dataset: {
                 ajax: true,
-                ajaxUrl: '/api/1.0/projects/' + ctx.project + '/series/',
+                ajaxUrl: url,
                 ajaxOnLoad: true,
                 records: []
             }
