@@ -52,6 +52,16 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(self)
         return Response(serializer.data)
 
+class SeriesListMixin:
+    queryset = Series.objects.all()
+    serializer_class = SeriesSerializer
+    paginate_by = 20
+    paginate_by_param = 'perpage'
+    max_paginate_by = 100
+    filter_backends = (filters.OrderingFilter, )
+    ordering_fields = ('name', 'n_patches', 'submitter__name', 'reviewer__name',
+                        'submitted', 'last_updated')
+
 class ProjectViewSet(viewsets.ViewSet):
     permission_classes = (MaintainerPermission, )
     model = Project
@@ -67,16 +77,9 @@ class ProjectViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
 class SeriesListViewSet(mixins.ListModelMixin,
+                        SeriesListMixin,
                         viewsets.GenericViewSet):
     permission_classes = (MaintainerPermission, )
-    queryset = Series.objects.all()
-    serializer_class = SeriesSerializer
-    paginate_by = 20
-    paginate_by_param = 'perpage'
-    max_paginate_by = 100
-    filter_backends = (filters.OrderingFilter, )
-    ordering_fields = ('name', 'n_patches', 'submitter__name', 'reviewer__name',
-                        'submitted', 'last_updated')
 
     def get_queryset(self):
         filter_kwargs = { 'project__linkname': self.kwargs['project_pk'] }
