@@ -57,6 +57,7 @@
       >About {{ project.linkname }}</a></li>
     <li><p class="navbar-text">|</p></li>
 {% endif %}
+{% block alternate_list %}{% endblock %}
 {% if user.is_authenticated %}
      <li><a href="{% url 'patchwork.views.user.todo_lists' %}">Todo
       <span class="badge">{{ user.profile.n_todo }}</span></a>

@@ -11,6 +11,10 @@ $(function () {
 });
 </script>
 {% endblock %}
+{% block alternate_list %}
+     <li><a href="{% url 'patchwork.views.patch.list' project_id=project.linkname %}">View Patches</a></li>
+     <li><p class="navbar-text">|</p></li>
+{% endblock %}
 {% block breadcrumb %}{{ project.name }} series{% endblock %}
 
 {% block body %}

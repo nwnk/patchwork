@@ -5,6 +5,10 @@
 
 {% block title %}{{project.name}}{% endblock %}
 {% block heading %}{{project.name}}{% endblock %}
+{% block alternate_list %}
+     <li><a href="{% url 'series_list' project=project.linkname %}?ordering=-submitted">View series</a></li>
+     <li><p class="navbar-text">|</p></li>
+{% endblock %}
 {% block breadcrumb %}{{ project.linkname }} patches{% endblock %}
 
 {% block body %}
