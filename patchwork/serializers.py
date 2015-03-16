@@ -33,7 +33,7 @@ class ProjectSerializer(serializers.HyperlinkedModelSerializer):
                   'webscm_url')
 
 class SeriesSerializer(serializers.ModelSerializer):
-    submitter__name = serializers.CharField(source='submitter.name',
+    submitter__name = serializers.CharField(source='submitter.display_name',
                                             read_only=True)
     reviewer__name = serializers.CharField(source='reviewer.name',
                                            read_only=True)
