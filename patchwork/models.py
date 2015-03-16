@@ -524,12 +524,8 @@ class PatchChangeNotification(models.Model):
     last_modified = models.DateTimeField(default = datetime.datetime.now)
     orig_state = models.ForeignKey(State)
 
-def _patch_change_callback(sender, instance, **kwargs):
-    # we only want notification of modified patches
-    if instance.pk is None:
-        return
-
-    if instance.project is None or not instance.project.send_notifications:
+def _patch_queue_notifications(instance):
+    if not instance.project.send_notifications:
         return
 
     try:
@@ -559,5 +555,15 @@ def _patch_change_callback(sender, instance, **kwargs):
 
     notification.last_modified = datetime.datetime.now()
     notification.save()
+
+def _patch_change_callback(sender, instance, **kwargs):
+    # we only want notification of modified patches
+    if instance.pk is None:
+        return
+
+    if instance.project is None:
+        return;
+
+    _patch_queue_notifications(instance)
 
 models.signals.pre_save.connect(_patch_change_callback, sender = Patch)
