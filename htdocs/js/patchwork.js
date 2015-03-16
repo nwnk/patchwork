@@ -90,7 +90,7 @@ var pw = (function() {
         var url;
 
         if (typeof url == 'undefined')
-            url = '/api/1.0/projects/' + ctx.project + '/series/';
+            url = '/api/1.0/projects/' + ctx.project + '/series/?ordering=-submitted';
 
         table.bind('dynatable:preinit', function(e, dynatable) {
             dynatable.utility.textTransform.PatchworkSeries = function(text) {
