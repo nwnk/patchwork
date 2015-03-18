@@ -449,6 +449,9 @@ class Series(models.Model):
     # This is the number of patches of the latest version.
     n_patches = models.IntegerField(default=0)
 
+    def __unicode__(self):
+        return self.name
+
 # A 'revision' of a series. Resending a new version of a patch or a full new
 # iteration of a series will create a new revision.
 class SeriesRevision(models.Model):
