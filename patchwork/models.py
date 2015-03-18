@@ -475,6 +475,9 @@ class SeriesRevision(models.Model):
                                                 order=order)
         sp.save()
 
+    def __unicode__(self):
+        return self.series.name + " (rev " + str(self.version) + ")"
+
 class SeriesRevisionPatch(models.Model):
     patch = models.ForeignKey(Patch)
     revision = models.ForeignKey(SeriesRevision)
