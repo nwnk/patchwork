@@ -205,6 +205,9 @@ class PatchTag(models.Model):
 def get_default_initial_patch_state():
     return State.objects.get(ordering=0)
 
+def get_default_initial_patch_state_pk():
+    return get_default_initial_patch_state().pk
+
 class PatchQuerySet(models.query.QuerySet):
 
     def with_tag_counts(self, project):
@@ -243,7 +246,7 @@ class Patch(models.Model):
     date = models.DateTimeField(default=datetime.datetime.now)
     submitter = models.ForeignKey(Person)
     delegate = models.ForeignKey(User, blank = True, null = True)
-    state = models.ForeignKey(State, default=get_default_initial_patch_state)
+    state = models.ForeignKey(State, default=get_default_initial_patch_state_pk)
     archived = models.BooleanField(default = False)
     headers = models.TextField(blank = True)
     content = models.TextField(null = True, blank = True)
