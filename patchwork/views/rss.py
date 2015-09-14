@@ -20,12 +20,27 @@
 import urlparse
 
 from django.core.urlresolvers import reverse
+from django.utils.feedgenerator import Rss201rev2Feed
 from django.contrib.syndication.views import Feed
 from django.shortcuts import get_object_or_404
 from patchwork.models import Project, SeriesLog
 
 
+class PatchworkFeed(Rss201rev2Feed):
+    def root_attributes(self):
+        attrs = super(PatchworkFeed, self).root_attributes()
+        attrs['xmlns:patchwork'] = \
+                'http://jk.ozlabs.org/schemas/patchwork/rss/1.0/'
+        return attrs
+
+    def add_item_elements(self, handler, item):
+        super(PatchworkFeed, self).add_item_elements(handler, item)
+        handler.addQuickElement(u'patchwork:action', item['action'])
+        handler.addQuickElement(u'patchwork:revision-api-url',
+                                item['revision-api-url'])
+
 class RSSFeed(Feed):
+    feed_type = PatchworkFeed
     actions = {
         'series-new': {
             'title': 'New',
@@ -84,3 +99,15 @@ class RSSFeed(Feed):
 
     def item_pubdate(self, item):
         return item.action_time
+
+    def item_extra_kwargs(self, item):
+        items = super(RSSFeed, self).item_extra_kwargs(item)
+        items.update({
+            'action': item.action.name,
+            'revision-api-url': self._url(reverse('seriesrevision-detail',
+                                          kwargs={
+                                              'series_pk': item.series.pk,
+                                              'pk': item.series.version,
+                                          })),
+        })
+        return items
