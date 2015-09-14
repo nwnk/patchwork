@@ -475,6 +475,14 @@ class SeriesRevision(models.Model):
                                                 order=order)
         sp.save()
 
+        # log series-new-revision, making sure all patches have actually been
+        # received
+        if self.patches.count() == self.series.n_patches:
+            new_revision = Action.objects.get(name='series-new-revision')
+            log = SeriesLog(action=new_revision, series=self.series,
+                            user=self.series.submitter.user)
+            log.save()
+
     def __unicode__(self):
         return self.series.name + " (rev " + str(self.version) + ")"
 

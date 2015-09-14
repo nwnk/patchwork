@@ -20,13 +20,14 @@
 import os
 
 from django.test import TestCase
-from patchwork.models import Patch, Series, SeriesRevision, Project
+from patchwork.models import Patch, Series, SeriesRevision, SeriesLog, \
+                             Project, User, Person
 from patchwork.tests.utils import read_mail
 
 from patchwork.bin.parsemail import parse_mail
 
 class SeriesTest(TestCase):
-    fixtures = ['default_states']
+    fixtures = ['default_states', 'default_actions']
 
     def setUp(self):
         # subclasses are responsible for defining those variables
@@ -75,6 +76,11 @@ class SeriesTest(TestCase):
         patches = Patch.objects.all()
         self.assertEquals(patches.count(), self.n_patches)
 
+        # We are inserting a single series, so the logs should only have one
+        # entry
+        logs = SeriesLog.objects.all()
+        self.assertEquals(logs.count(), 1)
+
 class IntelGfxTest(SeriesTest):
     project = Project(linkname = 'intel-gfx',
                       name = 'Intel Gfx',
@@ -91,6 +97,7 @@ class SingleMailSeries(IntelGfxTest):
     root_msgid = '<1400748280-26449-1-git-send-email-chris@chris-wilson.co.uk>'
     cover_letter = None
 
+class Series0001(SingleMailSeries):
     def testInsertion(self):
         """A single patch is a series of 1 patch"""
 
@@ -100,6 +107,27 @@ class SingleMailSeries(IntelGfxTest):
         patches = Patch.objects.all()
         patch = patches[0]
         self.assertEquals(patch.msgid, self.root_msgid)
+
+class SeriesLogTest(SingleMailSeries):
+    def setUp(self):
+        # Create a 'chris' User and Person
+        mail = 'chris@chris-wilson.co.uk'
+        self.user = User.objects.create_user('chris', mail, 'securepass')
+        person = Person(email=mail)
+        person.link_to_user(self.user)
+        person.save()
+
+        super(SeriesLogTest, self).setUp()
+
+    def testNewSeriesSeries(self):
+        entry = SeriesLog.objects.all()[0]
+        series = Series.objects.all()[0]
+        self.assertEquals(entry.series, series)
+
+    def testNewSeriesUser(self):
+        entry = SeriesLog.objects.all()[0]
+        self.assertEquals(self.user, entry.user)
+
 
 class Series0010(IntelGfxTest):
     mails = (
@@ -155,3 +183,16 @@ class MultipleMailCoverLetterSeriesUnordered(Series0010):
            the cover letter"""
 
         self.commonInsertionChecks()
+
+class MultipleMailCoverLetterSeriesIncomplete(Series0010):
+    mails = (
+        '0010-multiple-mails-cover-letter.mbox',
+        '0011-multiple-mails-cover-letter.mbox',
+        '0012-multiple-mails-cover-letter.mbox',
+        '0014-multiple-mails-cover-letter.mbox',
+    )
+
+class SeriesLogIncompleteTest(MultipleMailCoverLetterSeriesIncomplete):
+    def testNoNewSeriesIfIncomplete(self):
+        logs = SeriesLog.objects.all()
+        self.assertEquals(logs.count(), 0)
