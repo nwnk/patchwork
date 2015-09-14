@@ -487,6 +487,15 @@ class SeriesRevisionPatch(models.Model):
         unique_together = [('revision', 'patch')]
         ordering = ['order']
 
+class Action(models.Model):
+    name = models.CharField(max_length=20)
+
+class SeriesLog(models.Model):
+    action = models.ForeignKey(Action)
+    action_time = models.DateTimeField(auto_now=True)
+    series = models.ForeignKey(Series)
+    user = models.ForeignKey(User, null=True)
+
 class EmailConfirmation(models.Model):
     validity = datetime.timedelta(days = settings.CONFIRMATION_VALIDITY_DAYS)
     type = models.CharField(max_length = 20, choices = [
