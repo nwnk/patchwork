@@ -61,7 +61,7 @@ urlpatterns = patterns('',
     (r'^api/1.0/', include(series_router.urls)),
     (r'^api/1.0/', include(revisions_router.urls)),
 
-    # Example:
+    # project views
     (r'^$', 'patchwork.views.projects'),
     (r'^project/(?P<project_id>[^/]+)/list/$', 'patchwork.views.patch.list'),
     (r'^project/(?P<project_id>[^/]+)/patches/$', 'patchwork.views.patch.list'),
