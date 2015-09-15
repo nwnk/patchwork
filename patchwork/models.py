@@ -452,6 +452,9 @@ class Series(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_absolute_url(self):
+        return reverse('series', kwargs={ 'series': self.pk })
+
 # A 'revision' of a series. Resending a new version of a patch or a full new
 # iteration of a series will create a new revision.
 class SeriesRevision(models.Model):
