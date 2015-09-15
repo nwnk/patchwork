@@ -455,6 +455,12 @@ class Series(models.Model):
     def get_absolute_url(self):
         return reverse('series', kwargs={ 'series': self.pk })
 
+    def last_revision(self):
+        try:
+            return SeriesRevision.objects.filter(series=self).reverse()[0]
+        except IndexError:
+            return None
+
 # A 'revision' of a series. Resending a new version of a patch or a full new
 # iteration of a series will create a new revision.
 class SeriesRevision(models.Model):
