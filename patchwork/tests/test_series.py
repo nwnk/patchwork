@@ -22,7 +22,7 @@ import os
 from django.test import TestCase
 from patchwork.models import Patch, Series, SeriesRevision, SeriesLog, \
                              Project, User, Person
-from patchwork.tests.utils import read_mail
+from patchwork.tests.utils import defaults, read_mail, TestSeries
 
 from patchwork.bin.parsemail import parse_mail
 
@@ -30,19 +30,16 @@ class SeriesTest(TestCase):
     fixtures = ['default_states', 'default_actions']
 
     def setUp(self):
-        # subclasses are responsible for defining those variables
         self.assertTrue(self.project is not None)
-        self.assertTrue(self.n_patches is not None)
-        self.assertTrue(self.root_msgid is not None)
-        self.assertTrue(self.series_name is not None)
-
         self.project.save()
 
-        # insert the mails
-        self.n_mails = len(self.mails)
-        for filename in self.mails:
-            mail = read_mail(os.path.join('series', filename))
-            parse_mail(mail)
+        # insert the mails. 'mails' is an optional field, for subclasses
+        # that do have a list of on-disk emails.
+        if hasattr(self, 'mails'):
+            self.n_mails = len(self.mails)
+            for filename in self.mails:
+                mail = read_mail(os.path.join('series', filename))
+                parse_mail(mail)
 
     def tearDown(self):
         self.project.delete()
@@ -50,6 +47,11 @@ class SeriesTest(TestCase):
         Series.objects.all().delete()
 
     def commonInsertionChecks(self):
+        # subclasses are responsible for defining those variables
+        self.assertTrue(self.n_patches is not None)
+        self.assertTrue(self.root_msgid is not None)
+        self.assertTrue(self.series_name is not None)
+
         # make sure the series has been correctly populated
         series = Series.objects.all()
         self.assertEquals(series.count(), 1)
@@ -80,6 +82,26 @@ class SeriesTest(TestCase):
         # entry
         logs = SeriesLog.objects.all()
         self.assertEquals(logs.count(), 1)
+
+class GeneratedSeriesTest(SeriesTest):
+    project = defaults.project
+    cover_letter = defaults.series_cover_letter
+    series_name = defaults.series_name
+
+    def _create_series(self, cover_letter=True):
+        self.n_patches = 3
+        series = TestSeries(self.n_patches)
+        mails = series.create_mails()
+        self.root_msgid = mails[0].get('Message-Id')
+        series.insert(mails)
+
+    def testInsertion(self):
+        self._create_series()
+        self.commonInsertionChecks()
+
+    def testInsertionNoCoverLetter(self):
+        self._create_series(cover_letter=False)
+        self.commonInsertionChecks()
 
 class IntelGfxTest(SeriesTest):
     project = Project(linkname = 'intel-gfx',

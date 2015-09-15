@@ -20,6 +20,7 @@
 import os
 import codecs
 from patchwork.models import Project, Person
+from patchwork.bin.parsemail import parse_mail
 from django.contrib.auth.models import User
 from django.forms.fields import EmailField
 
@@ -51,6 +52,11 @@ class defaults(object):
     sender = 'Test Author <test-author@example.com>'
 
     subject = 'Test Subject'
+
+    series_name = 'Test Series'
+
+    series_cover_letter = """This is the test series cover letter.
+I hope you'll like it."""
 
     patch_name = 'Test Patch'
 
@@ -116,7 +122,7 @@ def read_mail(filename, project = None):
     return mail
 
 def create_email(content, subject = None, sender = None, multipart = False,
-        project = None, content_encoding = None):
+        project = None, content_encoding = None, in_reply_to = None):
     if subject is None:
         subject = defaults.subject
     if sender is None:
@@ -138,5 +144,53 @@ def create_email(content, subject = None, sender = None, multipart = False,
     msg['Subject'] = subject
     msg['From'] = sender
     msg['List-Id'] = project.listid
+    if in_reply_to:
+        msg['In-Reply-To'] = in_reply_to
+        msg['References'] = in_reply_to
 
     return msg
+
+class TestSeries(object):
+    def __init__(self, n_patches, has_cover_letter=True):
+        if n_patches < 1:
+            raise ValueError
+        self.n_patches = n_patches
+        self.has_cover_letter = has_cover_letter
+
+    def _create_cover_letter(self):
+        return create_email(defaults.series_cover_letter,
+                            subject='[PATCH 0/%d] %s' % (self.n_patches,
+                                                         defaults.series_name))
+
+    def _create_patch(self, n, in_reply_to):
+        return create_email(defaults.patch,
+                            subject='[PATCH %d/%d] %s' % (n, self.n_patches,
+                                                          defaults.patch_name),
+                            in_reply_to=in_reply_to)
+
+    def create_mails(self):
+        mails = []
+        root_msgid = None
+
+        # cover letter
+        if self.has_cover_letter:
+            cover_letter = self._create_cover_letter()
+            mails.append(cover_letter)
+            root_msgid = cover_letter.get('Message-Id')
+
+        # insert the first patch
+        patch = self._create_patch(1, root_msgid)
+        if not root_msgid:
+            root_msgid = patch.get('Message-Id')
+
+        # and the remaining patches
+        for i in range(1, self.n_patches + 1):
+            mails.append(self._create_patch(i + 1, root_msgid))
+
+        return mails
+
+    def insert(self, mails=[]):
+        if not mails:
+            mails = self.create_mails()
+        for mail in mails:
+            parse_mail(mail)
