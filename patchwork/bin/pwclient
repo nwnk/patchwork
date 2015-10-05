@@ -172,8 +172,6 @@ def list_patches(patches, format_str=None):
         for patch in patches:
             print(format_field_re.sub(patch_field, format_str))
     else:
-        print("%-7s %-12s %s" % ("ID", "State", "Name"))
-        print("%-7s %-12s %s" % ("--", "-----", "----"))
         for patch in patches:
             print("%-7d %-12s %s" % (patch['id'], patch['state'], patch['name']))
 
