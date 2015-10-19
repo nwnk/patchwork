@@ -155,25 +155,28 @@ def person_ids_by_name(rpc, name):
 
 def list_patches(patches, format_str=None):
     """Dump a list of patches to stdout."""
-    if format_str:
-        format_field_re = re.compile("%{([a-z0-9_]+)}")
+    try:
+	if format_str:
+	    format_field_re = re.compile("%{([a-z0-9_]+)}")
 
-        def patch_field(matchobj):
-            fieldname = matchobj.group(1)
+	    def patch_field(matchobj):
+		fieldname = matchobj.group(1)
 
-            if fieldname == "_msgid_":
-                # naive way to strip < and > from message-id
-                val = string.strip(str(patch["msgid"]), "<>")
-            else:
-                val = str(patch[fieldname])
+		if fieldname == "_msgid_":
+		    # naive way to strip < and > from message-id
+		    val = string.strip(str(patch["msgid"]), "<>")
+		else:
+		    val = str(patch[fieldname])
 
-            return val
+		return val
 
-        for patch in patches:
-            print(format_field_re.sub(patch_field, format_str))
-    else:
-        for patch in patches:
-            print("%-7d %-12s %s" % (patch['id'], patch['state'], patch['name']))
+	    for patch in patches:
+		print(format_field_re.sub(patch_field, format_str))
+	else:
+	    for patch in patches:
+		print("%-7d %-12s %s" % (patch['id'], patch['state'], patch['name']))
+    except IOError:
+	pass
 
 def action_list(rpc, filter, submitter_str, delegate_str, format_str=None):
     filter.resolve_ids(rpc)
