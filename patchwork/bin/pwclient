@@ -166,12 +166,12 @@ def list_patches(patches, format_str=None):
 		    # naive way to strip < and > from message-id
 		    val = string.strip(str(patch["msgid"]), "<>")
 		else:
-		    val = str(patch[fieldname])
+		    val = unicode(patch[fieldname])
 
 		return val
 
 	    for patch in patches:
-		print(format_field_re.sub(patch_field, format_str))
+		print(format_field_re.sub(patch_field, format_str).encode('utf-8'))
 	else:
 	    for patch in patches:
 		print("%-7d %-12s %s" % (patch['id'], patch['state'], patch['name']))
