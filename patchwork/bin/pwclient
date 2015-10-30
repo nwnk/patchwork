@@ -499,6 +499,9 @@ def main():
         action_parser.print_help()
         sys.exit(0)
 
+    if sys.argv[1] == 'show':
+	sys.argv[1] = 'view'
+
     args = action_parser.parse_args()
     args = dict(vars(args))
     action = args.get('subcmd')
